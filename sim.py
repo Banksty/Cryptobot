@@ -1,28 +1,37 @@
-import readdata
-import pandas
 import numpy
-import datetime
+import pandas
+import matplotlib.pyplot as plt
+from readdata import import_data
 
-#initliazation 
-pandas.set_option("display.max.columns", None)
-tradedata = readdata.import_data("trade")
-#print(tradedata.head())
-tickdata = readdata.import_data("tick")
-#print(tickdata.head())
+# import data
+tickdata = import_data('tick')
+tradedata = import_data('trade')
 
-tickdata["bestAsk"] = pandas.to_numeric(tickdata["bestAsk"])
-tickdata["bestBid"] = pandas.to_numeric(tickdata["bestBid"])
-tickdata["lastPrice"] = pandas.to_numeric(tickdata["lastPrice"])
-tradedata["price"] = pandas.to_numeric(tradedata["price"])
-tradedata["volume"] = pandas.to_numeric(tradedata["volume"])
+#tickdata.plot(x="timestampx", y=["bestAsk", "bestBid"], style = ".-")
+#tradedata.plot(x="timestampx", y=["price"], style = ".-")
+#plt.show()
 
-
-for item in tickdata.items():
-    print(item["bestBid"])
-# a = 1
-# for tick in tickdata["bestBid"]:
-#     a = a + 1
-#     s = a - 1
-#     print(tickdata["bestBid"][s:a])
-#     #print(tickdata["bestAsk"][1:5])
+# iterates through every row in 'tradedata'
+# i is the index of the row
+for i, row in tradedata.iterrows():
+    # E.g.    
+    a = row['price']
+    a = row['timestampx']    
+    # 3 different ways to get a value for that row 
+    print([i,
+           row['price'],
+           tradedata['price'][i],
+           tradedata.iloc[i]['price']])
+    
+    
+# iterate over ticks
+#trace = []
+#trade_i = 0
+#for i, row in tickdata.iterrows():
+#    bestBid = row['bestBid']
+#    bestAsk = row['bestAsk']
+#    timestamp = row['timestampx']
+#    midprice = (bestBid + bestAsk) / 2
+#    print(round(midprice,5))
+    
     

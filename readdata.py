@@ -9,45 +9,45 @@ from datetime import datetime
 def import_data(messageType):
     data = []
     fullfilename= "all.json"
+#    directory = "C:\\temp\\data\\BTC-AUD\\{}\\2021-07-10\\"
     directory = "C:\\cryptodata\\BTC-AUD\\{}\\2021-07-11\\"
     directory = directory.format(messageType)
+    
+    # read data files
     f = open(directory + fullfilename, "r")
     for line in f:
         jsonstr = line[:-1]
         try:
             jdata = json.loads(jsonstr)
         except:
-            print("error")
+            print("error, " + messageType)
         data.append(jdata)
     f.close
+    
+    # load into a dataframe
     df = pandas.DataFrame(data)
     dtdata = []
     for x in df["timestamp"]:
         dt = datetime.strptime(x, '%Y-%m-%dT%H:%M:%S.%fZ')
         dtdata.append(dt)
     df = df.assign(timestampx = dtdata)
+    
+    # str to numeric
+    if messageType == 'tick':
+        df["bestAsk"] = pandas.to_numeric(df["bestAsk"])
+        df["bestBid"] = pandas.to_numeric(df["bestBid"])
+        df["lastPrice"] = pandas.to_numeric(df["lastPrice"])
+    elif messageType == 'trade':
+        df["price"] = pandas.to_numeric(df["price"])
+        df["volume"] = pandas.to_numeric(df["volume"])
+        
     return df
 
-#initliazation 
 pandas.set_option("display.max.columns", None)
-tradedata = import_data("trade")
-#print(tradedata.head())
-tickdata = import_data("tick")
-#print(tickdata.head())
-tickdata["bestAsk"] = pandas.to_numeric(tickdata["bestAsk"])
-tickdata["bestBid"] = pandas.to_numeric(tickdata["bestBid"])
-tickdata["lastPrice"] = pandas.to_numeric(tickdata["lastPrice"])
-tradedata["price"] = pandas.to_numeric(tradedata["price"])
-tradedata["volume"] = pandas.to_numeric(tradedata["volume"])
-#print(tradedata["price"])
-# #df.head()
-# #print(df[1:5])
-tickdata.plot(x="timestampx", y=["bestAsk", "bestBid", "lastPrice"])
+
+#tickdata.plot(x="timestampx", y=["bestAsk", "bestBid", "lastPrice"])
 #tradedata.plot(x="timestampx", y=["price"])
 #tradedata["volume"].plot(style = ".")
 # tradedata["volume"].plot(kind = "hist")
-plt.show()
-#dat["bestAsk"].plot()
-#plt.plot(df["bestBid"])
 #plt.show()
 
