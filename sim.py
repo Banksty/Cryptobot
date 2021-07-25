@@ -51,22 +51,26 @@ for i, row in tickdata.iterrows():
     bestAsk = row['bestAsk']
     if tradevolume[i] != 0:
         if tradeprice[i] <= bestBid:
-            s = s + 1
+           # s = s + 1
             print("buy")
             x = x - bestBid * 0.01
             q = q + 0.01
         if tradeprice[i] >= bestAsk:
-            s = s + 1
+            #s = s + 1
             print("sell")
             x = x + bestAsk * 0.01
             q = q - 0.01
-        if s == 1:
-            fq = q
+        #if s == 1:
+            #fx = x
         print(x)
         print(q)
-lq = q
-print(lq - fq)
-        
+lq = q        
+lx = x
+e = bestBid + bestAsk 
+a = e / 2
+profit = lx - lq * a
+print(profit)
+print([x-q*a, q])
         
         
 #    midprice = (bestBid + bestAsk) / 2
