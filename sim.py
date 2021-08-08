@@ -1,5 +1,6 @@
 import numpy
 import pandas
+import datetime
 import matplotlib.pyplot as plt
 from readdata import import_data
 
@@ -44,17 +45,27 @@ for i, row in tickdata.iterrows():
         tradetimestamp = tradedata['timestampx'][trade_i]
         
 x = 0
-v = 0.01
+v = 1.0
 m = 0
 q = 0
 profit = 0
-statetrace = [[0,0,0,0,0,0,0]] * len(tickdata)
+botBid = tickdata["bestBid"][0]
+botAsk = tickdata["bestAsk"][0]
+ts = tickdata["timestampx"][0]
+change_ts = tickdata["timestampx"][0]
+statetrace = [[0,0,0,0,0,0,0,0,ts]] * len(tickdata)
 for i, row in tickdata.iterrows():
-    #print(i)
+    duration = tickdata["timestampx"][i] - ts
+    duration_ms = round(duration.total_seconds() * 1000)
+    ts = tickdata["timestampx"][i]
+    bot_waitdur = ts - change_ts
+    bot_waitdurms = round(bot_waitdur.total_seconds() * 1000)
     bestBid = row['bestBid']
     bestAsk = row['bestAsk']
-    botAsk = bestAsk
-    botBid = bestBid
+    if bot_waitdurms > 500:
+        change_ts = ts
+        botAsk = bestAsk
+        botBid = bestBid
     midprice = (bestBid + bestAsk) / 2
     if q < 0:
        liqudprice = bestAsk
@@ -62,42 +73,32 @@ for i, row in tickdata.iterrows():
        liqudprice = bestBid
     else: 
         liqudprice = midprice
-    statetrace[i] = [x, q, m, profit, botBid, botAsk, midprice]
+    statetrace[i] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts]
     if tradevolume[i] != 0:
-        if tradeprice[i] <= bestBid:
-           # s = s + 1
-            #print("buy")
-            x = x - v * botBid 
-            m = m + v * botBid
-            q = q + v
-        if tradeprice[i] >= bestAsk:
-            #s = s + 1
-            #print("sell")
-            x = x + v * botAsk 
-            m = m + v * botAsk
-            q = q - v
+        mv = min(tradevolume[i], v)
+        if tradeprice[i] <= botBid:
+            x = x - mv * botBid 
+            m = m + mv * botBid
+            q = q + mv
+        if tradeprice[i] >= botAsk:
+            x = x + mv * botAsk 
+            m = m + mv * botAsk
+            q = q - mv
     profit = x + q * liqudprice
-        #if s == 1:
-            #fx = x
-        #print(x)
 q = round(q, 2)
 x = x + q * liqudprice
-statetrace[-1] = [x, q, m, profit, botBid, botAsk, midprice]
+statetrace[-1] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts]
 #print(statetrace[-1])
-#print([x, q])
-df = pandas.DataFrame(statetrace, columns = ["x", "q", "m", "profit", "botBid", "botAsk", "midprice"])
-#df[["botBid"]].plot()
-#df[["botAsk"]].plot()
-#df[["midprice"]].plot()
-df.plot(y=["midprice", "botBid","botAsk"])
+df = pandas.DataFrame(statetrace, columns = ["x", "q", "m", "profit", "botBid", "botAsk", "midprice", "duration", "ts"])
+#df[1000:1200].plot(x = "ts", y=["midprice", "botBid","botAsk"])
 #print(df.iloc[[-1]])  
 #df[["x"]].plot()
 #df[["m"]].plot()
+#df[["duration"]][20:].plot(kind = "hist")
 #df[["q"]].plot()
-#df[["profit"]].plot()
+df[["profit"]].plot()
 plt.show()
-      
-        
+
 #    midprice = (bestBid + bestAsk) / 2
 #    print(round(midprice,5))
     
