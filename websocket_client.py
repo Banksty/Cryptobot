@@ -17,11 +17,13 @@ def write_data_to_file(message, jsonmsg, messageType):
     filename = filename.replace(':', '-')
     fullfilename = directory + '\\' + filename
     if not os.path.exists(directory):
-        os.makedirs(directory)
-    f = open(fullfilename, "a+")
-    f.write(message)
-    f.write('\n')
-    f.close
+        os.makedirs(directory)    
+    try:
+        f = open(fullfilename, "a+")
+        f.write(message)
+        f.write('\n')
+    finally:
+        f.close
 
 def on_message(ws, message):
     #print(message)
