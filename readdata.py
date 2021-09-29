@@ -8,9 +8,9 @@ from datetime import datetime
 
 def import_data(messageType):
     data = []
-    fullfilename= "all.json"
+    fullfilename= "al.json"
 #    directory = "C:\\temp\\data\\BTC-AUD\\{}\\2021-07-10\\"
-    directory = "C:\\cryptodata\\BTC-AUD\\{}\\2021-07-11\\"
+    directory = "C:\\cryptodata\\BTC-AUD\\{}\\2021-07-24\\"
     directory = directory.format(messageType)
     
     # read data files
@@ -21,6 +21,7 @@ def import_data(messageType):
             jdata = json.loads(jsonstr)
         except:
             print("error, " + messageType)
+            print(jsonstr)
         data.append(jdata)
     f.close
     
@@ -44,9 +45,10 @@ def import_data(messageType):
     return df
 
 pandas.set_option("display.max.columns", None)
-
-#tickdata.plot(x="timestampx", y=["bestAsk", "bestBid", "lastPrice"])
-#tradedata.plot(x="timestampx", y=["price"])
+# tickdata = import_data('tick')
+# tradedata = import_data('trade')
+# tickdata.plot(x="timestampx", y=["bestAsk", "bestBid", "lastPrice"])
+# tradedata.plot(x="timestampx", y=["price"])
 #tradedata["volume"].plot(style = ".")
 # tradedata["volume"].plot(kind = "hist")
 #plt.show()
