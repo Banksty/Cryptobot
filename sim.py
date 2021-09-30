@@ -32,18 +32,22 @@ tradetimestamp = tradedata['timestampx'][0]
 for i, row in tickdata.iterrows():
     if i == len(tickdata) - 1:
         break    
-    timestamp = row['timestampx']
+    #timestamp = row['timestampx']
+    timestamp = tickdata['timestampx'][i]
     timestampnext = tickdata['timestampx'][i+1]
     
-    if (tradetimestamp > timestamp) and (tradetimestamp <= timestampnext):
-       # print('trade happend !!!')
+    # iterate through ALL trades between the ticks (multiple trades with same ts)
+    while (tradetimestamp >= timestamp) and (tradetimestamp < timestampnext):
+        # print('trade happend !!!')
         tradeprice[i] = tradedata["price"][trade_i]
         tradevolume[i] = tradedata["volume"][trade_i]
         if trade_i == len(tradedata)-1:
             break
         trade_i = trade_i + 1 
         tradetimestamp = tradedata['timestampx'][trade_i]
-        
+    
+    if trade_i == len(tradedata)-1:
+        break    
 x = 0
 v = 0.1
 m = 0  
@@ -69,12 +73,12 @@ for i, row in tickdata.iterrows():
     bestAsk = row['bestAsk']
     middif = (bestBid + bestAsk) / 2 - midprice
     midprice = (bestBid + bestAsk) / 2 
-    if bot_waitdurms > 60000 * 60:
+    if bot_waitdurms > 5000:
         change_ts = ts
-        #botAsk = midprice + (1 - 2 * 0 / v) * (gam * sig**2 * (T - i + 1)) / 2
-        #botBid = midprice + (-1 - 2 * 0 / v) * (gam * sig**2 * (T - i + 1)) / 2
-        botAsk = midprice + (1 - 2 * 0 / v) * (gam * sig**2 * (tt)) / 2
-        botBid = midprice + (-1 - 2 * 0 / v) * (gam * sig**2 * (tt)) / 2
+        #botAsk = midprice + (1 - 2 * q / v) * (gam * sig**2 * (T - i + 1)) / 2
+        #botBid = midprice + (-1 - 2 * q / v) * (gam * sig**2 * (T - i + 1)) / 2
+        botAsk = midprice + (1 - 2 * q / v) * (gam * sig**2 * (tt)) / 2
+        botBid = midprice + (-1 - 2 * q / v) * (gam * sig**2 * (tt)) / 2
         if botAsk < midprice:
             botAsk = midprice
         if botBid > midprice:
@@ -112,10 +116,10 @@ print(df.iloc[[-1]])
 #df[["m"]].plot()
 #df[["duration"]][20:].plot(kind = "hist")
 df[["q"]].plot()
-#df[["profit"]].plot()
+df[["profit"]].plot()
 #df[["middif"]].plot()
 #df[["middif"]][20:].plot(kind = "hist")
-tp[["tradeprice"]].plot()
+#tp[["tradeprice"]].plot()
 plt.show()
 
 #    midprice = (bestBid + bestAsk) / 2
