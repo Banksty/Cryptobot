@@ -24,7 +24,7 @@ tradedata = import_data('trade')
 ##           tradedata.iloc[i]['price']])
     
     
-# iterate over ticks
+    # iterate over ticks
 tradeprice = [0] * len(tickdata)
 tradevolume = [0] * len(tickdata)
 trade_i = 0
@@ -48,64 +48,70 @@ for i, row in tickdata.iterrows():
     
     if trade_i == len(tradedata)-1:
         break    
-x = 0
-v = 0.1
-m = 0  
-q = 0
-profit = 0
-sig = 3.467015
-gam = 0.001
-T = len(tickdata)
-tt = 5000
-botBid = tickdata["bestBid"][0]
-botAsk = tickdata["bestAsk"][0]
-ts = tickdata["timestampx"][0]
-midprice = (botBid + botAsk) / 2
-change_ts = tickdata["timestampx"][0]
-statetrace = [[0,0,0,0,0,0,0,0,ts,0,0,0]] * len(tickdata)
-for i, row in tickdata.iterrows():
-    duration = tickdata["timestampx"][i] - ts
-    duration_ms = round(duration.total_seconds() * 1000)
-    ts = tickdata["timestampx"][i]
-    bot_waitdur = ts - change_ts
-    bot_waitdurms = round(bot_waitdur.total_seconds() * 1000)
-    bestBid = row['bestBid']
-    bestAsk = row['bestAsk']
-    middif = (bestBid + bestAsk) / 2 - midprice
-    midprice = (bestBid + bestAsk) / 2 
-    if bot_waitdurms > 5000:
-        change_ts = ts
-        #botAsk = midprice + (1 - 2 * q / v) * (gam * sig**2 * (T - i + 1)) / 2
-        #botBid = midprice + (-1 - 2 * q / v) * (gam * sig**2 * (T - i + 1)) / 2
-        botAsk = midprice + (1 - 2 * q / v) * (gam * sig**2 * (tt)) / 2
-        botBid = midprice + (-1 - 2 * q / v) * (gam * sig**2 * (tt)) / 2
-        if botAsk < midprice:
-            botAsk = midprice
-        if botBid > midprice:
-            botBid = midprice
-    if q < 0:
-       liqudprice = bestAsk
-    elif q > 0:
-       liqudprice = bestBid
-    else: 
-        liqudprice = midprice
-    statetrace[i] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk]
-    if tradevolume[i] != 0:
-        mv = min(tradevolume[i], v)
-        if tradeprice[i] <= botBid:
-            x = x - mv * botBid 
-            m = m + mv * botBid
-            q = q + mv
-        if tradeprice[i] >= botAsk:
-            x = x + mv * botAsk 
-            m = m + mv * botAsk
-            q = q - mv
-    profit = x + q * liqudprice
-q = round(q, 2)
-x = x + q * liqudprice
-statetrace[-1] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk]
-#print(statetrace[-1])
-df = pandas.DataFrame(statetrace, columns = ["x", "q", "m", "profit", "botBid", "botAsk", "midprice", "duration", "ts", "middif", "bestBid", "bestAsk"])
+    
+def sim(gam, tt): 
+    x = 0
+    v = 0.1
+    m = 0  
+    q = 0
+    profit = 0
+    sig = 3.467015
+    ##gam = 0.001
+    T = len(tickdata)
+    ##tt = 5000
+    botBid = tickdata["bestBid"][0]
+    botAsk = tickdata["bestAsk"][0]
+    ts = tickdata["timestampx"][0]
+    midprice = (botBid + botAsk) / 2
+    change_ts = tickdata["timestampx"][0]
+    statetrace = [[0,0,0,0,0,0,0,0,ts,0,0,0]] * len(tickdata)
+    for i, row in tickdata.iterrows():
+        duration = tickdata["timestampx"][i] - ts
+        duration_ms = round(duration.total_seconds() * 1000)
+        ts = tickdata["timestampx"][i]
+        bot_waitdur = ts - change_ts
+        bot_waitdurms = round(bot_waitdur.total_seconds() * 1000)
+        bestBid = row['bestBid']
+        bestAsk = row['bestAsk']
+        middif = (bestBid + bestAsk) / 2 - midprice
+        midprice = (bestBid + bestAsk) / 2 
+        if bot_waitdurms > 5000:
+            change_ts = ts
+            #botAsk = midprice + (1 - 2 * q / v) * (gam * sig**2 * (T - i + 1)) / 2
+            #botBid = midprice + (-1 - 2 * q / v) * (gam * sig**2 * (T - i + 1)) / 2
+            botAsk = midprice + (1 - 2 * q / v) * (gam * sig**2 * (tt)) / 2
+            botBid = midprice + (-1 - 2 * q / v) * (gam * sig**2 * (tt)) / 2
+            if botAsk < midprice:
+                botAsk = midprice
+            if botBid > midprice:
+                botBid = midprice
+        if q < 0:
+           liqudprice = bestAsk
+        elif q > 0:
+           liqudprice = bestBid
+        else: 
+            liqudprice = midprice
+        statetrace[i] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk]
+        if tradevolume[i] != 0:
+            mv = min(tradevolume[i], v)
+            if tradeprice[i] <= botBid:
+                x = x - mv * botBid 
+                m = m + mv * botBid
+                q = q + mv
+            if tradeprice[i] >= botAsk:
+                x = x + mv * botAsk 
+                m = m + mv * botAsk
+                q = q - mv
+        profit = x + q * liqudprice
+    q = round(q, 2)
+    x = x + q * liqudprice
+    statetrace[-1] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk]
+    #print(statetrace[-1])
+    df = pandas.DataFrame(statetrace, columns = ["x", "q", "m", "profit", "botBid", "botAsk", "midprice", "duration", "ts", "middif", "bestBid", "bestAsk"])
+    return df
+
+df = sim(0.001, 5000)
+
 sig = numpy.std(df[["middif"]])
 tp = pandas.DataFrame(tradeprice, columns = ["tradeprice"])
 print(sig)
