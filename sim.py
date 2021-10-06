@@ -1,5 +1,6 @@
 import numpy
 import pandas
+import time
 import datetime
 import matplotlib.pyplot as plt
 from readdata import import_data
@@ -110,24 +111,63 @@ def sim(gam, tt):
     df = pandas.DataFrame(statetrace, columns = ["x", "q", "m", "profit", "botBid", "botAsk", "midprice", "duration", "ts", "middif", "bestBid", "bestAsk"])
     return df
 
-df = sim(0.001, 5000)
+# def sim_sum(df, gamma):
+#     return [df["profit"].values[-1], df["q"].values[-1], df["m"].values[-1], gamma, df["m"].values[-1] * 0.001]
 
-sig = numpy.std(df[["middif"]])
-tp = pandas.DataFrame(tradeprice, columns = ["tradeprice"])
-print(sig)
-df.plot(x = "ts", y=["midprice", "botBid","botAsk"])
+# #df = sim(0.001, 5000)
+# c = 0
+# tt = 5000
+# gamma = numpy.arange(0.0001,0.005,0.0002).tolist()
+# final = []
+# while c < len(gamma):
+#     df = sim(gamma[c], tt)
+#     print(c)
+#     final.append(sim_sum(df, gamma[c]))
+#     c = c + 1
+# bigsumdf = pandas.DataFrame(final, columns = ["profit", "q", "m", "gamma", "com"])
+
+def sim_tt(df, tt):
+    return [df["profit"].values[-1], df["q"].values[-1], df["m"].values[-1], tt, df["m"].values[-1] * 0.001]
+
+c = 0
+gamma = 0.002
+tt = numpy.arange(3000,5000,100).tolist()
+#gamma = numpy.arange(0.0008,0.0013,0.0001).tolist()
+#print(gamma[0])
+final = []
+while c < len(tt):
+    df = sim(gamma, tt[c])
+    print(c)
+    final.append(sim_tt(df, tt[c]))
+    c = c + 1
+ttdf = pandas.DataFrame(final, columns = ["profit", "q", "m", "tt", "com"])
+
+
+#sig = numpy.std(df[["middif"]])
+#tp = pandas.DataFrame(tradeprice, columns = ["tradeprice"])
+#print(sig)
+#df.plot(x = "ts", y=["midprice", "botBid","botAsk"])
 #df.plot(x = "ts", y=["midprice", "bestBid","bestAsk"])
-print(df.iloc[[-1]])  
+#print(df.iloc[[-1]])  
 #df[["x"]].plot()
 #df[["m"]].plot()
 #df[["duration"]][20:].plot(kind = "hist")
-df[["q"]].plot()
-df[["profit"]].plot()
+#df[["q"]].plot()
+#df[["profit"]].plot()
 #df[["middif"]].plot()
 #df[["middif"]][20:].plot(kind = "hist")
 #tp[["tradeprice"]].plot()
-plt.show()
 
+# bigsumdf.plot(x = "gamma", y=["profit"])#, "q","m"])
+# bigsumdf.plot(x = "gamma", y=["m"])
+# bigsumdf.plot(x = "gamma", y=["q"])
+# bigsumdf.plot(x = "gamma", y=["com"])
+
+ttdf.plot(x = "tt", y=["profit"])#, "q","m"])
+ttdf.plot(x = "tt", y=["m"])
+ttdf.plot(x = "tt", y=["q"])
+ttdf.plot(x = "tt", y=["com"])
+plt.show()
 #    midprice = (bestBid + bestAsk) / 2
 #    print(round(midprice,5))
     
