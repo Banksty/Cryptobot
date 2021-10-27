@@ -46,6 +46,7 @@ def import_data(messageType):
 
 pandas.set_option("display.max.columns", None)
 # tickdata = import_data('tick')
+orderbook = import_data('orderbook')
 # tradedata = import_data('trade')
 # tickdata.plot(x="timestampx", y=["bestAsk", "bestBid", "lastPrice"])
 # tradedata.plot(x="timestampx", y=["price"])
