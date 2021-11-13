@@ -8,6 +8,7 @@ from readdata import import_data
 # import data
 tickdata = import_data('tick')
 tradedata = import_data('trade')
+orderbook = import_data('orderbook')
 
 # tickdata.plot(x="timestampx", y=["bestAsk", "bestBid"], style = ".-")
 # tradedata.plot(x="timestampx", y=["price"], style = ".-")
@@ -111,32 +112,32 @@ def sim(gam, tt, botwait):
             liqudprice = midprice
         statetrace[i] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk]
         
-        if tradevolume[i] != 0:
-            mv = min(tradevolume[i], v)
-            if tradeprice[i] <= botBid:
-                x = x - mv * botBid  
-                m = m + mv * botBid
-                q = q + mv
-            if tradeprice[i] >= botAsk:
-                x = x + mv * botAsk 
-                m = m + mv * botAsk
-                q = q - mv
+        # if tradevolume[i] != 0:
+        #     mv = min(tradevolume[i], v)
+        #     if tradeprice[i] <= botBid:
+        #         x = x - mv * botBid  
+        #         m = m + mv * botBid
+        #         q = q + mv
+        #     if tradeprice[i] >= botAsk:
+        #         x = x + mv * botAsk 
+        #         m = m + mv * botAsk
+        #         q = q - mv
                 
         #updating ^^^^
-        # if trades[i] != []:
-        #     for trade in trades[i]:
-        #         if trade[0] <= botBid:
-        #             mv = min(trade[1], lobv)
-        #             lobv = lobv - mv
-        #             x = x - mv * botBid  
-        #             m = m + mv * botBid
-        #             q = q + mv
-        #         if trade[0] >= botAsk:
-        #             mv = min(trade[1], loav)
-        #             loav = loav - mv
-        #             x = x + mv * botAsk 
-        #             m = m + mv * botAsk
-        #             q = q - mv
+        if trades[i] != []:
+            for trade in trades[i]:
+                if trade[0] <= botBid:
+                    mv = min(trade[1], lobv)
+                    lobv = lobv - mv
+                    x = x - mv * botBid  
+                    m = m + mv * botBid
+                    q = q + mv
+                if trade[0] >= botAsk:
+                    mv = min(trade[1], loav)
+                    loav = loav - mv
+                    x = x + mv * botAsk 
+                    m = m + mv * botAsk
+                    q = q - mv
                 
         profit = x + q * liqudprice
     q = round(q, 2)
