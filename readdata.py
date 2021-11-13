@@ -60,7 +60,7 @@ def import_data(messageType):
 
 pandas.set_option("display.max.columns", None)
 # tickdata = import_data('tick')
-orderbook = import_data('orderbook')
+# orderbook = import_data('orderbook')
 
 # for x in orderbook:
 #     obids = numpy.array(orderbook['bids'][x]).astype(numpy.float)

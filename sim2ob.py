@@ -32,17 +32,17 @@ def append_element(A,i,e):
    # return A
     
     # iterate over ticks
-tradeprice = [0] * len(tickdata)
-tradevolume = [0] * len(tickdata)
-trades = [[]] * len(tickdata)
+tradeprice = [0] * len(orderbook)
+tradevolume = [0] * len(orderbook)
+trades = [[]] * len(orderbook)
 trade_i = 0
 tradetimestamp = tradedata['timestampx'][0]
-for i, row in tickdata.iterrows():
-    if i == len(tickdata) - 1:
+for i, row in orderbook.iterrows():
+    if i == len(orderbook) - 1:
         break    
     #timestamp = row['timestampx']
-    timestamp = tickdata['timestampx'][i]
-    timestampnext = tickdata['timestampx'][i+1]
+    timestamp = orderbook['timestampx'][i]
+    timestampnext = orderbook['timestampx'][i+1]
     
     # iterate through ALL trades between the ticks (multiple trades with same ts)
     while (tradetimestamp >= timestamp) and (tradetimestamp < timestampnext):
@@ -74,22 +74,25 @@ def sim(gam, tt, botwait):
     profit = 0
     sig = 3.467015
     ##gam = 0.001
-    T = len(tickdata)
+    T = len(orderbook)
     ##tt = 5000
-    botBid = tickdata["bestBid"][0]
-    botAsk = tickdata["bestAsk"][0]
-    ts = tickdata["timestampx"][0]
+    botBid = orderbook['bidsx'][0][0, 0]
+    botAsk = orderbook['asksx'][0][0, 0]    
+    ts = orderbook["timestampx"][0]
     midprice = (botBid + botAsk) / 2
-    change_ts = tickdata["timestampx"][0]
-    statetrace = [[0,0,0,0,0,0,0,0,ts,0,0,0]] * len(tickdata)
-    for i, row in tickdata.iterrows():
-        duration = tickdata["timestampx"][i] - ts
+    change_ts = orderbook["timestampx"][0]
+    statetrace = [[0,0,0,0,0,0,0,0,ts,0,0,0]] * len(orderbook)
+    for i, row in orderbook.iterrows():
+        if i > 1000:
+            break
+    
+        duration = orderbook["timestampx"][i] - ts
         duration_ms = round(duration.total_seconds() * 1000)
-        ts = tickdata["timestampx"][i]
+        ts = orderbook["timestampx"][i]
         bot_waitdur = ts - change_ts
         bot_waitdurms = round(bot_waitdur.total_seconds() * 1000)
-        bestBid = row['bestBid']
-        bestAsk = row['bestAsk']
+        bestBid = row['bidsx'][0,0]
+        bestAsk = row['asksx'][0,0]
         middif = (bestBid + bestAsk) / 2 - midprice
         midprice = (bestBid + bestAsk) / 2 
         if bot_waitdurms > botwait:
@@ -191,10 +194,10 @@ df = sim(gamma, tt, 4000)
 #df.plot(x = "ts", y=["midprice", "botBid","botAsk"])
 #df.plot(x = "ts", y=["midprice", "bestBid","bestAsk"])
 #print(df.iloc[[-1]])  
-df[["x"]].plot()
+#df[["x"]].plot()
 df[["m"]].plot()
 #df[["duration"]][20:].plot(kind = "hist")
-df[["q"]].plot()
+#df[["q"]].plot()
 df[["profit"]].plot()
 #df[["middif"]].plot()
 #df[["middif"]][20:].plot(kind = "hist")
@@ -209,7 +212,7 @@ df[["profit"]].plot()
 # xer.plot(x = "botwait", y=["m"])
 # xer.plot(x = "botwait", y=["q"])
 # xer.plot(x = "botwait", y=["com"])
-plt.show()
+#plt.show()
 # #    midprice = (bestBid + bestAsk) / 2
 #    print(round(midprice,5))
     
