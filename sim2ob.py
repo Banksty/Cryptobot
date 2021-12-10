@@ -10,20 +10,16 @@ tickdata = import_data('tick')
 tradedata = import_data('trade')
 orderbook = import_data('orderbook')
 
-# tickdata.plot(x="timestampx", y=["bestAsk", "bestBid"], style = ".-")
-# tradedata.plot(x="timestampx", y=["price"], style = ".-")
-# plt.show()
+trades = [[]] * len(orderbook)
 
-# iterates through every row in 'tradedata'
-# i is the index of the row
-#for i, row in tradedata.iterrows():
-#    # E.g.    
-#    a = row['price']
-#    a = row['timestampx']   
-#    # 3 different ways to get a value for that row 
-#    print([i, row['price']])
-##           tradedata['price'][i],
-##           tradedata.iloc[i]['price']])
+def getnonemptyindex(raggedlist):
+    index = []
+    for i, x in enumerate(raggedlist):
+        if x != []:
+            index.append(i)
+    return index
+
+
 def append_element(A,i,e):
     if len(A[i]) == 0:
         A[i]=[e]
@@ -32,37 +28,39 @@ def append_element(A,i,e):
    # return A
     
     # iterate over ticks
-tradeprice = [0] * len(orderbook)
-tradevolume = [0] * len(orderbook)
-trades = [[]] * len(orderbook)
-trade_i = 0
-tradetimestamp = tradedata['timestampx'][0]
-for i, row in orderbook.iterrows():
-    if i == len(orderbook) - 1:
-        break    
-    #timestamp = row['timestampx']
-    timestamp = orderbook['timestampx'][i]
-    timestampnext = orderbook['timestampx'][i+1]
-    
-    # iterate through ALL trades between the ticks (multiple trades with same ts)
-    while (tradetimestamp >= timestamp) and (tradetimestamp < timestampnext):
-        # print('trade happend !!!')
-        tp = tradedata["price"][trade_i]
-        tv = tradedata["volume"][trade_i]
-        tradeprice[i] = tp
-        tradevolume[i] = tv
-        append_element(trades, i, [tp, tv])
-        #print([tp, tv, trade_i, i])
-       # print(tradetimestamp, timestamp, timestampnext)
-        #time.sleep(1)
+def transformdata():
+    tradeprice = [0] * len(orderbook)
+    tradevolume = [0] * len(orderbook)
+    global trades
+    trades = [[]] * len(orderbook)
+    trade_i = 0
+    tradetimestamp = tradedata['timestampx'][0]
+    for i, row in orderbook.iterrows():
+        if i == len(orderbook) - 1:
+            break    
+        #timestamp = row['timestampx']
+        timestamp = orderbook['timestampx'][i]
+        timestampnext = orderbook['timestampx'][i+1]
+        
+        # iterate through ALL trades between the ticks (multiple trades with same ts)
+        while (tradetimestamp >= timestamp) and (tradetimestamp < timestampnext):
+            # print('trade happend !!!')
+            tp = tradedata["price"][trade_i]
+            tv = tradedata["volume"][trade_i]
+            tradeprice[i] = tp
+            tradevolume[i] = tv
+            append_element(trades, i, [tp, tv])
+            #print([tp, tv, trade_i, i])
+           # print(tradetimestamp, timestamp, timestampnext)
+            #time.sleep(1)
+            if trade_i == len(tradedata)-1:
+                break
+            trade_i = trade_i + 1 
+            tradetimestamp = tradedata['timestampx'][trade_i]
+        
         if trade_i == len(tradedata)-1:
-            break
-        trade_i = trade_i + 1 
-        tradetimestamp = tradedata['timestampx'][trade_i]
-    
-    if trade_i == len(tradedata)-1:
-        break    
-    
+            break    
+        
     
 def sim(gam, tt, botwait): 
     x = 0
@@ -83,8 +81,8 @@ def sim(gam, tt, botwait):
     change_ts = orderbook["timestampx"][0]
     statetrace = [[0,0,0,0,0,0,0,0,ts,0,0,0]] * len(orderbook)
     for i, row in orderbook.iterrows():
-        if i > 1000:
-            break
+       # if i > 5000:
+       #     break
     
         duration = orderbook["timestampx"][i] - ts
         duration_ms = round(duration.total_seconds() * 1000)
@@ -168,52 +166,31 @@ def sim(gam, tt, botwait):
 def sim_sum(df, x):
     return [df["profit"].values[-1], df["q"].values[-1], df["m"].values[-1], x, df["m"].values[-1] * 0.001]
 
-c = 0
-gamma = 0.002
-#tt = numpy.arange(0,8000,500).tolist()
-tt = 5000
-botwait = numpy.arange(0,10000, 500).tolist()
 
-df = sim(gamma, tt, 4000)
+#import data
+# tickdata = import_data('tick')
+# tradedata = import_data('trade')
+# orderbook = import_data('orderbook')
+# trades = [[]] * len(orderbook)
 
-#gamma = numpy.arange(0.0008,0.0013,0.0001).tolist()
-#print(gamma[0])
-# final = []
-# while c < len(botwait):
-#     df = sim(gamma, tt, botwait[c])
-#     print(c)
-#     final.append(sim_sum(df, botwait[c]))
-#     c = c + 1
-# xer = pandas.DataFrame(final, columns = ["profit", "q", "m", "botwait", "com"])
+#preparedata
+transformdata()
 
 
+#transformdata()
+# tickdata.plot(x="timestampx", y=["bestAsk", "bestBid"], style = ".-")
+# tradedata.plot(x="timestampx", y=["price"], style = ".-")
+# plt.show()
 
-#sig = numpy.std(df[["middif"]])
-#tp = pandas.DataFrame(tradeprice, columns = ["tradeprice"])
-#print(sig)
-#df.plot(x = "ts", y=["midprice", "botBid","botAsk"])
-#df.plot(x = "ts", y=["midprice", "bestBid","bestAsk"])
-#print(df.iloc[[-1]])  
-#df[["x"]].plot()
-df[["m"]].plot()
-#df[["duration"]][20:].plot(kind = "hist")
-#df[["q"]].plot()
-df[["profit"]].plot()
-#df[["middif"]].plot()
-#df[["middif"]][20:].plot(kind = "hist")
-#tp[["tradeprice"]].plot()
+# iterates through every row in 'tradedata'
+# i is the index of the row
+#for i, row in tradedata.iterrows():
+#    # E.g.    
+#    a = row['price']
+#    a = row['timestampx']   
+#    # 3 different ways to get a value for that row 
+#    print([i, row['price']])
+##           tradedata['price'][i],
+##           tradedata.iloc[i]['price']])
 
-# bigsumdf.plot(x = "gamma", y=["profit"])#, "q","m"])
-# bigsumdf.plot(x = "gamma", y=["m"])
-# bigsumdf.plot(x = "gamma", y=["q"])
-# bigsumdf.plot(x = "gamma", y=["com"])
 
-# xer.plot(x = "botwait", y=["profit"])#, "q","m"])
-# xer.plot(x = "botwait", y=["m"])
-# xer.plot(x = "botwait", y=["q"])
-# xer.plot(x = "botwait", y=["com"])
-#plt.show()
-# #    midprice = (bestBid + bestAsk) / 2
-#    print(round(midprice,5))
-    
-    
