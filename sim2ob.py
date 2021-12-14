@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 from readdata import import_data
 
 # import data
-tickdata = import_data('tick')
-tradedata = import_data('trade')
-orderbook = import_data('orderbook')
+# tickdata = import_data('tick')
+# tradedata = import_data('trade')
+# orderbook = import_data('orderbook')
 
-trades = [[]] * len(orderbook)
+# trades = [[]] * len(orderbook)
 
 def getnonemptyindex(raggedlist):
     index = []
@@ -28,10 +28,9 @@ def append_element(A,i,e):
    # return A
     
     # iterate over ticks
-def transformdata():
+def transformdata(tickdata, tradedata, orderbook):
     tradeprice = [0] * len(orderbook)
     tradevolume = [0] * len(orderbook)
-    global trades
     trades = [[]] * len(orderbook)
     trade_i = 0
     tradetimestamp = tradedata['timestampx'][0]
@@ -59,10 +58,11 @@ def transformdata():
             tradetimestamp = tradedata['timestampx'][trade_i]
         
         if trade_i == len(tradedata)-1:
-            break    
+            break   
+    return trades
         
     
-def sim(gam, tt, botwait): 
+def sim(gam, tt, botwait, tickdata, tradedata, orderbook, trades): 
     x = 0
     v = 0.1
     loav = v
@@ -174,7 +174,7 @@ def sim_sum(df, x):
 # trades = [[]] * len(orderbook)
 
 #preparedata
-transformdata()
+#transformdata()
 
 
 #transformdata()
