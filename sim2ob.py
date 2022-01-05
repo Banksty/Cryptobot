@@ -67,6 +67,8 @@ def sim(gam, tt, botwait, tickdata, tradedata, orderbook, trades):
     v = 0.1
     loav = v
     lobv = v
+    loap = 0
+    lobp = 0
     m = 0  
     q = 0
     profit = 0
@@ -79,7 +81,7 @@ def sim(gam, tt, botwait, tickdata, tradedata, orderbook, trades):
     ts = orderbook["timestampx"][0]
     midprice = (botBid + botAsk) / 2
     change_ts = orderbook["timestampx"][0]
-    statetrace = [[0,0,0,0,0,0,0,0,ts,0,0,0]] * len(orderbook)
+    statetrace = [[0,0,0,0,0,0,0,0,ts,0,0,0,0,0,0,0]] * len(orderbook)
     for i, row in orderbook.iterrows():
        # if i > 5000:
        #     break
@@ -94,9 +96,13 @@ def sim(gam, tt, botwait, tickdata, tradedata, orderbook, trades):
         middif = (bestBid + bestAsk) / 2 - midprice
         midprice = (bestBid + bestAsk) / 2 
         if bot_waitdurms > botwait:
+            #setting up limit order
+            
             change_ts = ts
-            loav = v
+            loav = v #limit order ask, bid, priority
             lobv = v
+            loap = 0
+            lobp = 0
             #botAsk = midprice + (1 - 2 * q / v) * (gam * sig**2 * (T - i + 1)) / 2
             #botBid = midprice + (-1 - 2 * q / v) * (gam * sig**2 * (T - i + 1)) / 2
             botAsk = midprice + (1 - 2 * q / v) * (gam * sig**2 * (tt)) / 2
@@ -105,13 +111,20 @@ def sim(gam, tt, botwait, tickdata, tradedata, orderbook, trades):
                 botAsk = midprice
             if botBid > midprice:
                 botBid = midprice
+            botAsk = round(botAsk, 2)
+            botBid = round(botBid, 2)
+            bidsx = row['bidsx']
+            col = [bid[0] for bid in bidsx]
+            if botBid in col:
+                lobi = col.index(botBid)
+                lobp = bidsx[lobi][1]
         if q < 0:
            liqudprice = bestAsk
         elif q > 0:
            liqudprice = bestBid
         else: 
             liqudprice = midprice
-        statetrace[i] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk]
+        statetrace[i] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk, loav, lobv, loap, lobp]
         
         # if tradevolume[i] != 0:
         #     mv = min(tradevolume[i], v)
@@ -130,7 +143,7 @@ def sim(gam, tt, botwait, tickdata, tradedata, orderbook, trades):
                 if trade[0] <= botBid:
                     mv = min(trade[1], lobv)
                     lobv = lobv - mv
-                    x = x - mv * botBid  
+                    x = x - mv * botBid
                     m = m + mv * botBid
                     q = q + mv
                 if trade[0] >= botAsk:
@@ -143,9 +156,10 @@ def sim(gam, tt, botwait, tickdata, tradedata, orderbook, trades):
         profit = x + q * liqudprice
     q = round(q, 2)
     x = x + q * liqudprice
-    statetrace[-1] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk]
+    statetrace[-1] = [x, q, m, profit, botBid, botAsk, midprice, duration_ms, ts, middif, bestBid, bestAsk, loav, lobv, loap, lobp]
     #print(statetrace[-1])
-    df = pandas.DataFrame(statetrace, columns = ["x", "q", "m", "profit", "botBid", "botAsk", "midprice", "duration", "ts", "middif", "bestBid", "bestAsk"])
+    df = pandas.DataFrame(statetrace, columns = [
+        "x", "q", "m", "profit", "botBid", "botAsk", "midprice", "duration", "ts", "middif", "bestBid", "bestAsk",  "loav", "lobv", "loap", "lobp"])
     return df
 
 # def sim_sum(df, gamma):
