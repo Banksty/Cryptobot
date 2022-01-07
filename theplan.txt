@@ -1,0 +1,15 @@
+SHORT PLAN:
+1. get sim working with changes we made. I.e. orderbook rather than tick. 
+2. speed up our simulation, by how we are iterating over the data
+2a). do more visualisation of the market structure, to gain better understanding. 
+3. simulate the queue. This is so that if someone has an order in front of ours, we simulate that they get filled before ours (they have priority). 
+4. train model again. See how well it goes. 
+5. learn some maths, expected value & utility. 
+6. new model. We will use a discretization regime to give the bot a number of choices, and it will choose the option with the best expected value. 
+7. simulated experiments on model variables. (Like we did before, e.g. gamma). 
+8. out-of-sample testing. This means we do a simulation but on NEW data, that was not used to train the model. This is an important step in test the true efficacy of the model.
+9. step up an environment in the cloud, to run simulations & live "paper" trading. 
+10. do some larger scale experiments. 
+11. try our framework on data from a different exchange: Binance
+13. deep revision of model & more experiments. 
+12. consider actual live trading
